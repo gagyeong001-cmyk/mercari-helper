@@ -1,5 +1,7 @@
 name: Mercari email watch
 on:
+  schedule:
+    - cron: '*/15 * * * *'
   workflow_dispatch:
     inputs:
       test_email:
