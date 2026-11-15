@@ -1,4 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises';
+import nodemailer from 'nodemailer';
 
 const config = JSON.parse(await readFile('watch-config.json', 'utf8'));
 const state = JSON.parse(await readFile('watch-state.json', 'utf8'));
@@ -6,7 +7,7 @@ state.seen ||= {};
 state.initialized ||= [];
 const enabled = config.watches.filter(w => w.enabled && w.query && Number(w.maxPrice) > 0);
 if (!enabled.length) { console.log('No enabled watches'); process.exit(0); }
-for (const key of ['APIFY_TOKEN', 'RESEND_API_KEY', 'ALERT_EMAIL_TO', 'ALERT_EMAIL_FROM']) {
+for (const key of ['APIFY_TOKEN', 'NAVER_EMAIL', 'NAVER_SMTP_PASSWORD']) {
   if (!process.env[key]) throw Error('Missing GitHub Actions secret: ' + key);
 }
 const normalize = (row) => {
@@ -18,21 +19,20 @@ const normalize = (row) => {
     ? raw.split('?')[0] : /^m\d+$/.test(id) ? 'https://jp.mercari.com/item/' + id : '';
   return { id: id || url, url, title, price };
 };
+const mailer = nodemailer.createTransport({
+  host: 'smtp.naver.com', port: 465, secure: true,
+  auth: { user: process.env.NAVER_EMAIL, pass: process.env.NAVER_SMTP_PASSWORD },
+  connectionTimeout: 15000, greetingTimeout: 15000, socketTimeout: 20000
+});
 const send = async (item, query) => {
   const message = '메루카리 신규 매물\n' + item.title + '\n¥' +
     item.price.toLocaleString('ja-JP') + '\n검색: ' + query + '\n' + item.url;
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {'content-type':'application/json', authorization:'Bearer ' + process.env.RESEND_API_KEY},
-    body: JSON.stringify({
-      from: process.env.ALERT_EMAIL_FROM,
-      to: [process.env.ALERT_EMAIL_TO],
-      subject: '🐰 메루카리 꿀매 발견: ¥' + item.price.toLocaleString('ja-JP'),
-      text: message
-    }),
-    signal: AbortSignal.timeout(15000)
+  await mailer.sendMail({
+    from: process.env.NAVER_EMAIL,
+    to: process.env.ALERT_EMAIL_TO || process.env.NAVER_EMAIL,
+    subject: '🐰 메루카리 꿀매 발견: ¥' + item.price.toLocaleString('ja-JP'),
+    text: message
   });
-  if (!res.ok) throw Error('Email delivery failed: HTTP ' + res.status + ' ' + (await res.text()).slice(0,250));
 };
 let failed = false;
 for (const watch of enabled) {
