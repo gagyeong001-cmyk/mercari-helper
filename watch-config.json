@@ -1,0 +1,16 @@
+{
+  "watches": [
+    {
+      "id": "tanuki",
+      "query": "たぬきだもん ちいかわ",
+      "maxPrice": 2000,
+      "enabled": false
+    },
+    {
+      "id": "baby",
+      "query": "ベビー マスコット ちいかわ",
+      "maxPrice": 1200,
+      "enabled": false
+    }
+  ]
+}
