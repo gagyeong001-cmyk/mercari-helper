@@ -8,11 +8,13 @@ for (const query of queries) {
       'accept':'text/html,application/xhtml+xml','accept-language':'ja-JP,ja;q=0.9'
     },signal:AbortSignal.timeout(20000)});
     const html = await response.text();
-    const flightScripts = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(s=>s.includes('self.__next_f.push'));
-    const flightText = flightScripts.join('');
-    const itemIds = [...new Set(flightText.match(/m[0-9]{8,}/g)||[])];
-    const markers = ['price','itemName','itemId','searchResult','items','商品','ちいかわ','口だけ','mercari'];
-    const markerCounts = Object.fromEntries(markers.map(k=>[k,flightText.split(k).length-1]));
-    console.log(JSON.stringify({query,status:response.status,flightScriptCount:flightScripts.length,flightLength:flightText.length,flightItemIds:itemIds.slice(0,5),markerCounts,htmlItemIds:[...new Set(html.match(/m[0-9]{8,}/g)||[])].slice(0,5)}));
+    const scripts = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(s=>s.includes('self.__next_f.push'));
+    const text = scripts.join('');
+    const markers = ['itemId','itemName','price','m56788464657','m77688585101'];
+    const samples = Object.fromEntries(markers.map(k=>{
+      const i=text.indexOf(k);
+      return [k,i<0?null:text.slice(Math.max(0,i-100),Math.min(text.length,i+180))];
+    }));
+    console.log(JSON.stringify({query,status:response.status,flightLength:text.length,samples}));
   } catch(error) {console.log(JSON.stringify({query,error:error.message}));}
 }
