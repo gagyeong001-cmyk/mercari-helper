@@ -6,7 +6,7 @@ state.seen ||= {};
 state.initialized ||= [];
 const enabled = config.watches.filter(w => w.enabled && w.query && Number(w.maxPrice) > 0);
 if (!enabled.length) { console.log('No enabled watches'); process.exit(0); }
-for (const key of ['APIFY_TOKEN', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID']) {
+for (const key of ['APIFY_TOKEN', 'RESEND_API_KEY', 'ALERT_EMAIL_TO', 'ALERT_EMAIL_FROM']) {
   if (!process.env[key]) throw Error('Missing GitHub Actions secret: ' + key);
 }
 const normalize = (row) => {
@@ -19,14 +19,20 @@ const normalize = (row) => {
   return { id: id || url, url, title, price };
 };
 const send = async (item, query) => {
-  const message = '🐰 메루카리 신규 매물\n' + item.title + '\n¥' +
+  const message = '메루카리 신규 매물\n' + item.title + '\n¥' +
     item.price.toLocaleString('ja-JP') + '\n검색: ' + query + '\n' + item.url;
-  const res = await fetch('https://api.telegram.org/bot' + process.env.TELEGRAM_BOT_TOKEN + '/sendMessage', {
-    method: 'POST', headers: {'content-type': 'application/json'},
-    body: JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text: message, disable_web_page_preview: true }),
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {'content-type':'application/json', authorization:'Bearer ' + process.env.RESEND_API_KEY},
+    body: JSON.stringify({
+      from: process.env.ALERT_EMAIL_FROM,
+      to: [process.env.ALERT_EMAIL_TO],
+      subject: '🐰 메루카리 꿀매 발견: ¥' + item.price.toLocaleString('ja-JP'),
+      text: message
+    }),
     signal: AbortSignal.timeout(15000)
   });
-  if (!res.ok) throw Error('Telegram delivery failed: HTTP ' + res.status);
+  if (!res.ok) throw Error('Email delivery failed: HTTP ' + res.status + ' ' + (await res.text()).slice(0,250));
 };
 let failed = false;
 for (const watch of enabled) {
