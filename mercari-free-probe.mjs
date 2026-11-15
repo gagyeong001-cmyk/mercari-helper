@@ -12,7 +12,7 @@ for (const query of queries) {
       signal: AbortSignal.timeout(20000)
     });
     const html = await response.text();
-    const ids = [...new Set([...html.matchAll(/(?:https?:\\/\\/jp\\.mercari\\.com)?\\/item\\/(m\\d{8,})/g)].map(x => x[1]))];
+    const ids = [...new Set([...html.matchAll(/m\d{8,}/g)].map(x => x[0]))];
     const hasData = html.includes('__NEXT_DATA__') || html.includes('itemName') || html.includes('itemPrice');
     console.log(JSON.stringify({query, status:response.status, htmlLength:html.length, itemLinks:ids.length, sampleIds:ids.slice(0,3), hasData, blocked:response.status===403||response.status===429}));
   } catch(e) { console.log(JSON.stringify({query,error:e.message})); }
