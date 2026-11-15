@@ -31,9 +31,25 @@
       "m94645668362",
       "m60739880628",
       "m72187359431"
+    ],
+    "chiikawa-irekawacchatta-3000": [
+      "m38243599383",
+      "m24396344220",
+      "m13946915194",
+      "m10998664535",
+      "m16026141754"
+    ],
+    "kuchidake-dashite-3000": [
+      "m79616216207",
+      "m96878955458",
+      "m86015785602",
+      "m51501429262",
+      "m66547159710"
     ]
   },
   "initialized": [
-    "chiikawa-kuji-test"
+    "chiikawa-kuji-test",
+    "chiikawa-irekawacchatta-3000",
+    "kuchidake-dashite-3000"
   ]
 }
