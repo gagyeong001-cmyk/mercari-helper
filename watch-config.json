@@ -1,0 +1,10 @@
+{
+  "watches": [
+    {
+      "id": "chiikawa-kuji-test",
+      "query": "ちいかわ くじ",
+      "maxPrice": 2001,
+      "enabled": true
+    }
+  ]
+}
