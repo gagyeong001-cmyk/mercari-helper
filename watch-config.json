@@ -5,6 +5,12 @@
       "query": "ちいかわ入れ替わっちゃった",
       "maxPrice": 3000,
       "enabled": true
+    },
+    {
+      "id": "kuchidake-dashite-3000",
+      "query": "口だけは出してッ",
+      "maxPrice": 3000,
+      "enabled": true
     }
   ]
 }
