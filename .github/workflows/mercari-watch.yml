@@ -1,6 +1,11 @@
 name: Mercari email watch
 on:
   workflow_dispatch:
+    inputs:
+      test_email:
+        description: 'Send one test email only (skip Mercari search)'
+        type: boolean
+        default: true
 permissions:
   contents: write
 concurrency:
@@ -18,7 +23,15 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-audit --no-fund
+      - name: Send test email
+        if: ${{ inputs.test_email == true }}
+        env:
+          NAVER_EMAIL: ${{ secrets.NAVER_EMAIL }}
+          NAVER_SMTP_PASSWORD: ${{ secrets.NAVER_SMTP_PASSWORD }}
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
+        run: node test-email.mjs
       - name: Check new listings
+        if: ${{ inputs.test_email != true }}
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           NAVER_EMAIL: ${{ secrets.NAVER_EMAIL }}
@@ -26,6 +39,7 @@ jobs:
           ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
         run: node watch.mjs
       - name: Save seen listings
+        if: ${{ inputs.test_email != true }}
         run: |
           if ! git diff --quiet -- watch-state.json; then
             git config user.name "github-actions[bot]"
