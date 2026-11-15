@@ -41,7 +41,7 @@ for (const watch of enabled) {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {'content-type':'application/json', authorization:'Bearer ' + process.env.APIFY_TOKEN},
-      body: JSON.stringify({items:[], searches:[watch.query], sellers:[], scrapeDetails:false, translateTitles:false, maxItems:30}),
+      body: JSON.stringify({items:[], searches:[watch.query], sellers:[], scrapeDetails:false, translateTitles:false, maxItems:5}),
       signal: AbortSignal.timeout(115000)
     });
     if (!response.ok) throw Error('Apify HTTP ' + response.status);
