@@ -1,4 +1,4 @@
-name: Mercari Telegram watch
+name: Mercari email watch
 on:
   schedule:
     - cron: '*/30 * * * *'
@@ -6,7 +6,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: mercari-watch
+  group: mercari-email-watch
   cancel-in-progress: false
 jobs:
   watch:
@@ -22,8 +22,9 @@ jobs:
       - name: Check new listings
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
+          ALERT_EMAIL_FROM: ${{ secrets.ALERT_EMAIL_FROM }}
         run: node watch.mjs
       - name: Save seen listings
         run: |
